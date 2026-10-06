@@ -1,4 +1,4 @@
-# GLPI 11 on PHP 8.4 + Apache — portable image
+# GLPI 11 on PHP 8.4 + Apache - portable image
 FROM php:8.4-apache-bookworm
 
 ARG GLPI_VERSION=11.0.9

@@ -58,7 +58,39 @@ services:
       TZ: ${TZ:-Europe/Paris}
     # not published: reached through the glpi container at /phpmyadmin/
 
+  glpi-agent:
+    build:
+      context: ./agent
+      args:
+        GLPI_AGENT_VERSION: ${GLPI_AGENT_VERSION:-1.20}
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        no_proxy: ${no_proxy:-}
+    image: glpi-agent:${GLPI_AGENT_VERSION:-1.20}
+    container_name: glpi-agent
+    restart: unless-stopped
+    depends_on:
+      - glpi
+    # Host namespaces + privileged so the inventory describes the Docker host
+    # itself (hostname, NICs, disks, BIOS via dmidecode), not the container
+    network_mode: host
+    pid: host
+    privileged: true
+    environment:
+      GLPI_SERVER: ${GLPI_AGENT_SERVER:-http://localhost:${GLPI_PORT:-8080}/front/inventory.php}
+      GLPI_TAG: ${GLPI_AGENT_TAG:-}
+      no_proxy: localhost,127.0.0.1,::1
+      NO_PROXY: localhost,127.0.0.1,::1
+      TZ: ${TZ:-Europe/Paris}
+    volumes:
+      - glpi-agent-data:/var/lib/glpi-agent
+      - /etc/os-release:/etc/os-release:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /dev:/dev:ro
+      - /sys:/sys:ro
+
 volumes:
   glpi-data:
   glpi-db:
   glpi-marketplace:
+  glpi-agent-data:
